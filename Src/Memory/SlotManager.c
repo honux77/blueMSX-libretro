@@ -338,7 +338,7 @@ void slotManagerAddCheat(int addr, int data, int size)
     cheats[cheats_count].size = (UInt8)size;
     cheats_count++;
 
-    if (cheats_count == 1) {
+    if (cheats_count == 1 && current_r800 != NULL) {
         current_r800->readMemory = slotReadCheat;
     }
 }
@@ -353,7 +353,9 @@ void slotManagerResetCheat()
         cheats = NULL;
     }
 
-    current_r800->readMemory = slotRead;
+    if (current_r800 != NULL) {
+        current_r800->readMemory = slotRead;
+    }
 }
 
 void slotManagerSetR800(R800* r800)

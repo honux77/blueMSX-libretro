@@ -286,6 +286,8 @@ int msxCreate(Machine* machine,
 
     if (!success) {
         destroy();
+        boardInfo->cpuRef = NULL;
+        boardInfo->run    = NULL;
     }
 
     return success;

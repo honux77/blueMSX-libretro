@@ -28,6 +28,7 @@
 #if defined(__linux__) || defined(EMSCRIPTEN)
 #define _GNU_SOURCE
 #endif
+#include <stdio.h>
 #include <string.h>
 
 #include "Machine.h"
@@ -1183,7 +1184,7 @@ int machineInitialize(Machine* machine, UInt8** mainRam, UInt32* mainRamSize, UI
         int subslot;
         int startPage;
         char* romName;
-        
+
         // Don't map slots with error
         if (machine->slotInfo[i].error) {
             continue;

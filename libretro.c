@@ -1595,8 +1595,10 @@ void retro_run(void)
       }
    }
 
+   if (!boardInfo.cpuRef || !boardInfo.run)
+      return;
    ((R800*)boardInfo.cpuRef)->terminate = 0;
-   boardInfo.run(boardInfo.cpuRef);   
+   boardInfo.run(boardInfo.cpuRef);
    RETRO_PERFORMANCE_STOP(core_retro_run);
 
    if (!use_overscan)

@@ -30,9 +30,52 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#ifdef __linux__
+#include <dirent.h>
+#include <strings.h>
+#endif
 
 // PacketFileSystem.h Need to be included after all other includes
 #include "PacketFileSystem.h"
+
+#ifdef __linux__
+static FILE* fopenCaseInsensitive(const char* filename, const char* mode)
+{
+    FILE* file;
+    char dir[1024];
+    char base[256];
+    char* p;
+    DIR* dp;
+    struct dirent* de;
+
+    file = fopen(filename, mode);
+    if (file) return file;
+
+    strncpy(dir, filename, sizeof(dir) - 1);
+    dir[sizeof(dir) - 1] = 0;
+    p = strrchr(dir, '/');
+    if (!p) return NULL;
+
+    strncpy(base, p + 1, sizeof(base) - 1);
+    base[sizeof(base) - 1] = 0;
+    *p = 0;
+
+    dp = opendir(dir);
+    if (!dp) return NULL;
+
+    while ((de = readdir(dp)) != NULL) {
+        if (strcasecmp(de->d_name, base) == 0) {
+            char fullpath[1280];
+            snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, de->d_name);
+            closedir(dp);
+            return fopen(fullpath, mode);
+        }
+    }
+
+    closedir(dp);
+    return NULL;
+}
+#endif
 
 UInt8* romLoad(const char *fileName, const char *fileInZipFile, int* size)
 {
@@ -53,7 +96,11 @@ UInt8* romLoad(const char *fileName, const char *fileInZipFile, int* size)
         return buf;
     }
 
+#ifdef __linux__
+    file = fopenCaseInsensitive(fileName, "rb");
+#else
     file = fopen(fileName, "rb");
+#endif
     if (!file)
         goto error;
 
