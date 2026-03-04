@@ -65,6 +65,29 @@ The Sunrise IDE interface allows loading hard disk images (`.dsk`) on MSX2 or la
 
 > **Note:** Sunrise IDE support requires MSX2 or later. A restart is required when toggling this option.
 
+## Machine Type ROM Files
+
+When selecting a specific machine type, the corresponding ROM files must be present
+in your system directory under `Machines/<machine-name>/`.
+
+| Machine | Required ROM files | Status |
+|---------|-------------------|--------|
+| MSX / MSX2 / MSX2+ / MSXturboR | See `Machines/Shared Roms/` | Bundled with blueMSX |
+| MSXturboR - Panasonic FS-A1GT | See `Machines/MSXturboR - Panasonic FS-A1GT/` | Bundled with blueMSX |
+| MSX2+ - Panasonic FS-A1WSX | See `Machines/MSX2+ - Panasonic FS-A1WSX/` | Bundled with blueMSX |
+| MSX - Daewoo DPC-100 | `100bios.rom`, `100han.rom` | Available in openMSX system ROMs |
+| MSX - Daewoo DPC-180 | `180bios.rom`, `180han.rom` | Available in openMSX system ROMs |
+| MSX - Daewoo DPC-200 | `200bios.rom`, `200han.rom` | Available in openMSX system ROMs |
+| MSX - Daewoo DPC-200E | `dpc200ebios.rom` | ROMs not widely available |
+| MSX2 - Daewoo CPC-300 | `300bios.rom`, `300han.rom`, `300ext.rom` | Available in openMSX system ROMs |
+| MSX2 - Daewoo CPC-300E | `300ebios.rom`, `300ehan.rom`, `300eext.rom` | ROMs not widely available |
+| MSX2 - Daewoo CPC-400 | `400kfn.rom`, `400bios.rom`, `400han.rom`, `400ext.rom`, `400disk.rom` | ROMs not widely available |
+| MSX2 - Daewoo CPC-400S | `400skfn.rom`, `400sbios.rom`, `400shan.rom`, `400sext.rom`, `400sdisk.rom` | Available in openMSX system ROMs |
+| MSX2 - Daewoo CPC-61 Zemmix Super V | `61bios.rom`, `61han.rom`, `61sub.rom` | Available in openMSX system ROMs |
+
+> **Note:** If a machine's ROM files are missing, the core will fail to load with an error message
+> instead of freezing. Use `Auto` or a machine with available ROMs.
+
 ## Core Options
 
 | Option | Description | Default |
