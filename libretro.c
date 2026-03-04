@@ -1360,6 +1360,15 @@ bool retro_load_game(const struct retro_game_info *info)
    boardSetVideoAutodetect(properties->video.detectActiveMonitor);
 
    emulatorStart(NULL);
+
+   if (!boardInfo.cpuRef || !boardInfo.run) {
+      if (log_cb)
+         log_cb(RETRO_LOG_ERROR, "[blueMSX] Machine failed to start. "
+                "Check that ROM files exist for machine type: %s\n",
+                msx_type ? msx_type : "Auto");
+      return false;
+   }
+
    return true;
 }
 
