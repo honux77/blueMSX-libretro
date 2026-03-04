@@ -1323,6 +1323,7 @@ bool retro_load_game(const struct retro_game_info *info)
                if (sunriseide_enable)
                {
                   insertDiskette(properties, diskGetHdDriveId(2, 0), disk_paths[disk_index], NULL, -1);
+                  properties->media.disks[0].fileName[0] = '\0'; /* Don't load HD image as floppy too */
                }
                else
                {

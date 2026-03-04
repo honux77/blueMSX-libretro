@@ -607,7 +607,7 @@ void addSunriseIde(Machine* machine)
     slotInfo->startPage = 0;
     slotInfo->pageCount = 8;
     slotInfo->romType = ROM_SUNRISEIDE;
-    strcpy(slotInfo->name, "Machines/Shared Roms/SUNRISEIDE.rom");
+    snprintf(slotInfo->name, sizeof(slotInfo->name), "%s/Shared Roms/SUNRISEIDE.rom", machinesDir);
     strcpy(slotInfo->inZipName, "");
     slotInfo->error = 0;
     machine->slotInfoCount++;
