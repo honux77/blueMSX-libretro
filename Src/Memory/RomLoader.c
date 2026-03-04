@@ -34,6 +34,10 @@
 #include <dirent.h>
 #include <strings.h>
 #endif
+#ifdef __LIBRETRO__
+#include <libretro.h>
+extern retro_log_printf_t log_cb;
+#endif
 
 // PacketFileSystem.h Need to be included after all other includes
 #include "PacketFileSystem.h"
@@ -175,7 +179,12 @@ UInt8* romLoad(const char *fileName, const char *fileInZipFile, int* size)
     return buf;
 
 error:
+#ifdef __LIBRETRO__
+    if (fileName && fileName[0] && log_cb)
+        log_cb(RETRO_LOG_WARN, "[RomLoader] Failed to load ROM: %s\n", fileName);
+#else
     if (fileName && fileName[0])
-      fflush(stdout);
+        fflush(stdout);
+#endif
     return NULL;
 }
