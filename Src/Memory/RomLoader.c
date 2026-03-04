@@ -39,40 +39,94 @@
 #include "PacketFileSystem.h"
 
 #ifdef __linux__
+/* Resolve a path case-insensitively on Linux, component by component.
+   Returns 1 on success (resolved is populated), 0 on failure. */
+static int resolveCaseInsensitivePath(const char* path, char* resolved, size_t resolvedSize)
+{
+    char component[256];
+    const char* src;
+    char* slash;
+    DIR* dp;
+    struct dirent* de;
+    size_t compLen;
+    size_t resolvedLen;
+    int found;
+
+    if (!path || !path[0]) return 0;
+
+    /* Start resolved path */
+    if (path[0] == '/') {
+        resolved[0] = '/';
+        resolved[1] = '\0';
+        src = path + 1;
+    } else {
+        resolved[0] = '\0';
+        src = path;
+    }
+
+    while (*src) {
+        /* Extract next component */
+        slash = strchr(src, '/');
+        if (slash) {
+            compLen = (size_t)(slash - src);
+        } else {
+            compLen = strlen(src);
+        }
+
+        if (compLen == 0) { src++; continue; }
+        if (compLen >= sizeof(component)) compLen = sizeof(component) - 1;
+
+        strncpy(component, src, compLen);
+        component[compLen] = '\0';
+        src += compLen;
+        if (*src == '/') src++;
+
+        /* Search for component case-insensitively in current resolved dir */
+        resolvedLen = strlen(resolved);
+        dp = opendir(resolvedLen > 0 ? resolved : ".");
+        found = 0;
+        if (dp) {
+            while ((de = readdir(dp)) != NULL) {
+                if (strcasecmp(de->d_name, component) == 0) {
+                    if (resolvedLen > 0 && resolved[resolvedLen - 1] != '/') {
+                        strncat(resolved, "/", resolvedSize - resolvedLen - 1);
+                        resolvedLen++;
+                    }
+                    strncat(resolved, de->d_name, resolvedSize - resolvedLen - 1);
+                    found = 1;
+                    break;
+                }
+            }
+            closedir(dp);
+        }
+
+        if (!found) {
+            /* Not found - append as-is and continue (may fail at fopen) */
+            resolvedLen = strlen(resolved);
+            if (resolvedLen > 0 && resolved[resolvedLen - 1] != '/') {
+                strncat(resolved, "/", resolvedSize - resolvedLen - 1);
+                resolvedLen++;
+            }
+            strncat(resolved, component, resolvedSize - resolvedLen - 1);
+        }
+    }
+
+    return resolved[0] != '\0';
+}
+
 static FILE* fopenCaseInsensitive(const char* filename, const char* mode)
 {
     FILE* file;
-    char dir[1024];
-    char base[256];
-    char* p;
-    DIR* dp;
-    struct dirent* de;
+    char resolved[1280];
 
     file = fopen(filename, mode);
     if (file) return file;
 
-    strncpy(dir, filename, sizeof(dir) - 1);
-    dir[sizeof(dir) - 1] = 0;
-    p = strrchr(dir, '/');
-    if (!p) return NULL;
-
-    strncpy(base, p + 1, sizeof(base) - 1);
-    base[sizeof(base) - 1] = 0;
-    *p = 0;
-
-    dp = opendir(dir);
-    if (!dp) return NULL;
-
-    while ((de = readdir(dp)) != NULL) {
-        if (strcasecmp(de->d_name, base) == 0) {
-            char fullpath[1280];
-            snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, de->d_name);
-            closedir(dp);
-            return fopen(fullpath, mode);
-        }
+    if (resolveCaseInsensitivePath(filename, resolved, sizeof(resolved))) {
+        if (strcmp(resolved, filename) != 0)
+            return fopen(resolved, mode);
     }
 
-    closedir(dp);
     return NULL;
 }
 #endif
